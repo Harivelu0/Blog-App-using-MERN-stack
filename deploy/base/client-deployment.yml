@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: blog-client
-          image: blog-client:latest
+          image: harivp1234/blog-client:latest
           imagePullPolicy: Never
           ports:
             - containerPort: 80

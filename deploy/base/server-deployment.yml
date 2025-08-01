@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: blog-server
-          image: blog-server:latest
+          image: harivp1234/blog-server:latest
           imagePullPolicy: Never   # important when using local images with kind
           ports:
             - containerPort: 5000
