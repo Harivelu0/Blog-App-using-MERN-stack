@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  client:
+    build:
+      context: ./client
+    container_name: blog_client  
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    restart: always
+  
+  
+  server:
+    build:
+      context: ./server
+    container_name: blog_server  
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/BlogApp
+    restart: always
+  
+
+  mongo:
+    image: mongo
+    container_name: blog_db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    restart: always
+
+volumes:
+  mongo-data:
+
+
