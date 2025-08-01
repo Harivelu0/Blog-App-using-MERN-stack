@@ -1,0 +1,77 @@
+name: CI-Ffor blog
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-and-analyse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: 18 
+
+      - name: Install server dependencies
+        working-directory: ./server
+        run: npm install
+
+      - name: Install client dependencies
+        working-directory: ./client
+        run: npm install
+
+      - name: run eslint(server)
+        working-directory: ./server
+        run: npm run lint
+        continue-on-error: true
+
+      - name: run eslint(client)
+        working-directory: ./client
+        run: npm run lint
+        continue-on-error: true
+
+      - name: run sonarqube analysis
+        uses: SonarSource/sonarcloud-github-action@master
+        continue-on-error: true
+        env:
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.projectKey=blog
+
+      - name: trivy scan(server)
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: ./server
+
+      - name: trivy scan(client)
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          scan-ref: ./client
+
+      - name: docker login
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: build and push client image
+        run: |
+           docker build -t ${{ secrets.DOCKER_USERNAME }}/blog-client:latest ./client
+           docker push ${{s ecrets.DOCKER_USERNAME }}/blog-client:latest
+
+      - name: build and push server image
+        run: |
+           docker build -t ${{ secrets.DOCKER_USERNAME }}/blog-server:latest ./server
+           docker push ${{ secrets.DOCKER_USERNAME }}/blog-server:latest
+
+        
+   
