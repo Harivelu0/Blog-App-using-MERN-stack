@@ -1,0 +1,23 @@
+name: CD - deploy in AKS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: azure login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      - name: set AKS Context
+        run: | 
+          az aks get-credentials --resource-group blogdeploy --name blog-cluster --overwrite-existing
+
+      - name: deploy to AKS
+        run: kubectl apply -f deploy/base/
