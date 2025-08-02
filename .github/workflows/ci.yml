@@ -1,4 +1,4 @@
-name: CI-Ffor blog
+name: CI-for blog
 on:
   push:
     branches:
